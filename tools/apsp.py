@@ -18,7 +18,7 @@ START, H, NFILE = {2: (0x13D58, 16, 5), 3: (0x13CD0, 17, 4)}[GAME]
 W = 288; STRIDE = 0x1000
 TOP = 0                      # 원본 글자 맨 윗줄
 INK_H = H - 2                # 원본 글자 높이(2편 0‥14, 3편 0‥15 — 그 아래 1줄은 그림자)
-X0, INDENT, XMAX = 2, 18, 284
+X0, INDENT, XMAX = 2, 0, 284         # ★들여쓰기 없음(하스피 2026-10-10 «들여쓰기좀 없애»)
 FONT = os.path.join(scgfx.NG, 'NanumGothicExtraBold.ttf')
 TSV = os.path.join(ROOT, 'work', 'text', 'apsp_ko.tsv')
 PUNCT = ',.!?:;)]}\'"~、。，．！？：；）］｝」』】〉》”’…‥・·～〜♪♥'
