@@ -28,6 +28,7 @@ def main():
     if '--write' in sys.argv:
         os.makedirs(os.path.dirname(OUT), exist_ok=True)
         files = {'/S0_0.BIN': s0, '/S0_1.BIN': s1, '/SC_1.BIN': sc1}
+        files['/3.BIN'] = scgfx.patch_3bin(disc.read('/3.BIN'))           # 타이틀 로고 부제(크기 그대로)
         for mv in MOVIES:                                             # 동영상 자막(tools/moviesub.py 가 구운 것, 원본 크기 그대로 → 제자리)
             p = os.path.join(ROOT, 'work', 'kr', mv + '.BIN')
             d = open(p, 'rb').read()

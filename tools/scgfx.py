@@ -190,6 +190,30 @@ def preview():
     print('항목 이름 그림 %d곳 · 단위 열 %d곳' % (ns, nu))
 
 
+TITLE_LOGO = (0x5E270, 134, '심판받는자')   # (3.BIN 오프셋, 일본어 시작 열(Ⅲ 동그라미 뒤), 번역) — 하스피 2026-10-10
+
+# ★2026-10-10 타이틀 로고 부제(하스피) — 3.BIN 232×96 4비트(무압축), 부제 69‥86행 · 획 3 · 가장자리 8 · 0 투명
+#   SIDESTORY Ⅱ/Ⅲ 동그라미는 그대로, 뒤 일본어만 지우고 한글(나눔고딕 ExtraBold, 칸보다 길면 가로만 좁힘)
+def title_sub(px, text, x0, x1=232, y0=69, y1=87):
+    w, h = x1 - x0, y1 - y0
+    F = ImageFont.truetype(os.path.join(NG, 'NanumGothicExtraBold.ttf'), 80)
+    d = ImageDraw.Draw(Image.new('L', (1, 1))); b = d.textbbox((0, 0), text, font=F)
+    big = Image.new('L', (b[2] - b[0] + 8, b[3] - b[1] + 8), 0)
+    ImageDraw.Draw(big).text((4 - b[0], 4 - b[1]), text, font=F, fill=255)
+    tw = min(round(big.width * h / big.height), w)
+    cov = np.asarray(big.resize((tw, h), Image.LANCZOS), np.float32) / 255
+    px[y0 - 1:y1 + 1, x0:x1] = 0
+    sub = px[y0:y1, x0:x0 + tw]
+    sub[cov > 0.2] = 8; sub[cov > 0.42] = 3
+    return px
+
+
+def patch_3bin(d3):
+    d = bytearray(d3); o, x0, t = TITLE_LOGO
+    put4(d, o, title_sub(get4(d, o, 232, 96), t, x0))
+    return bytes(d)
+
+
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8')
     preview()
