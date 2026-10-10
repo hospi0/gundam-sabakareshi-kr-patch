@@ -64,6 +64,7 @@ def payload(rows, gi):
 
 
 TSV = os.path.join(ROOT, 'work', 'text', 'voice_ko.tsv')
+NO_SUB = {'V49', 'V50', 'V51', 'V52'}   # ★2026-10-10 하스피 — 막간 화면(AP_SP*) 내레이션: 화면 글 그림(tools/apsp.py)이 올라가는 동안 음성 자막 비움(번역은 남겨 둠)
 
 
 def load():
@@ -72,6 +73,7 @@ def load():
     for ln in open(TSV, encoding='utf-8').read().splitlines()[1:]:
         c = ln.split('	')
         if len(c) < 5 or not c[4].strip(): continue
+        if c[0].split('_')[0] in NO_SUB: continue
         out.setdefault(c[0].split('_')[0], []).append((float(c[1]), float(c[2]), c[4].strip()))
     return out
 
