@@ -125,6 +125,21 @@ def unit(px):
     return ink(px, cov, (3, 5, 37, 25))
 
 
+RANKS = [(0x8540, '소위'), (0x8BA0, '중위'), (0x9200, '대위'), (0x61088, '소령')]   # ★2026-10-10 하스피 «우하단 계급 그림문자» — 40×80(위 계급장·아래 글자 50‥61행)
+
+
+def rank(px, text):
+    """계급 칸 아래 글자(行 48‥63)만 지우고 밝은 획(1·4·7) + 오른쪽 아래 그림자(14)로 다시 씀 — 계급장은 그대로"""
+    cov = cover([text], 'NanumGothicBold.ttf', 12, 40, 80, align='center', y0=49)
+    px[48:64, 1:39] = 0
+    sub = px[48:64, 1:39]; c = cov[48:64, 1:39]
+    core = c > 0.55; mid = (c > 0.3) & ~core; edge = (c > 0.1) & ~core & ~mid
+    sh = np.zeros_like(core); sh[1:, 1:] = (core | mid)[:-1, :-1]
+    sub[sh & ~(core | mid | edge)] = 14
+    sub[edge] = 10; sub[mid] = 7; sub[core] = 1
+    return px
+
+
 def same_spots(d, o, w, h):
     """같은 그림이 있는 모든 위치(첫 줄 + 가운데 줄이 같은 곳)"""
     img = d[o:o + w * h // 2]; out = []; i = d.find(img)
@@ -139,6 +154,8 @@ def patch_sc1(sc1):
     lab = get4(sc1, 0x3280, 240, 80); new = label(lab.copy())
     spots = same_spots(sc1, 0x3280, 240, 80)
     for o in spots: put4(d, o, new)
+    for o, t in RANKS:
+        put4(d, o, rank(get4(d, o, 40, 80), t))
     un = get4(sc1, 0x20, 40, 80); nu = unit(un.copy())
     uspots = same_spots(sc1, 0x20, 40, 80)
     for o in uspots: put4(d, o, nu)
