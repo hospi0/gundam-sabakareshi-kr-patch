@@ -70,11 +70,43 @@ def join(toks):
     return s
 
 
+# 줄바꿈 금지·감점(하스피 2026-10-10 «기회라는 / 듯» — 꾸밈말과 의존 명사가 갈라짐)
+BOUND = re.compile(r'^(듯|것|수|때|중|뿐|만큼|만한|자(?=이고|인가|이다|였다)|데|바|줄|척|채|대로|적|터|바람)'
+                   r'(이고|이|은|는|을|를|이다|이었다|이었던|인가|에|에서|까지|인|이던|이었다|한|이|도|뿐이었다|이라|이니)?[.,…!?"]*$')
+def AUX(l, r):
+    """본용언 + 보조 용언(«발견되지 / 않아» «이루려 / 했던» «덮쳐 / 오는» «이뤄 / 낸»)"""
+    return ((l.endswith('지') and r.startswith('않')) or
+            (l.endswith('려') and r[:1] in '하했한할') or
+            (l.endswith('고') and r[:1] in '있말') or
+            (l[-1:] in '어아여쳐해워져뤄라' and r[:1] in '오와온가간갔주준줬보봤버두둔놓놔내낸있'))
+
+
+MODIF = {'어느', '두', '세', '그', '이', '저', '큰', '새', '온', '각', '몇', '단', '더', '또'}
+PAIRS = {('캘리포니아', '베이스'), ('님바스', '슈타젠'), ('알프', '카무라'), ('클루스트', '모제스'), ('모제스', '박사'), ('클루스트', '박사가'),
+         ('루나', '투'), ('EXAM', '시스템'), ('EXAM', '연구의'), ('유우', '일행'), ('유우', '일행은'), ('유우', '일행의'),
+         ('유우', '일행에게'), ('유우', '일행이'), ('푸른', '사신이'), ('푸른', '짐')}
+PAIR_HEAD = ('블루', '2호기'), ('블루', '3호기')
+
+
+def break_cost(tk, b):
+    """tk[b-1] 뒤에서 줄을 끊는 값(클수록 나쁨)"""
+    if b <= 0 or b >= len(tk): return 0
+    left, right = tk[b - 1], tk[b]
+    lr = left.rstrip('\0'); l = lr.rstrip(',.…'); r = right.rstrip('\0')
+    if left.endswith('\0') and lr[-1:] not in ',.…!?': return 90000   # ) " 뒤 조사(«EXAM(이그잼) / 을»)
+    if lr[-1:] in ',.…!?': return -1500                         # 쉼표·마침표 뒤에서 끊기 = 좋음
+    if BOUND.match(r): return 60000
+    if l in MODIF: return 30000
+    if AUX(l, r): return 40000
+    if (l, r.rstrip(',.…')) in PAIRS or any(l == a and r.startswith(h) for a, h in PAIR_HEAD): return 30000
+    return 0
+
+
 def wrap_exact(text, n, indent, F):
-    """n 줄로 정확히 — 줄마다 남는 폭 제곱합 최소(DP, 고르게)"""
+    """n 줄로 정확히 — 줄마다 남는 폭 제곱합 + 끊는 자리 값(break_cost) 최소(DP)"""
     tk = tokens(text); m = len(tk)
     lim = lambda i: XMAX - X0 - (INDENT if (i == 0 and indent) else 0)
-    INF = float('inf'); cost = {}
+    INF = float('inf')
     def wid(a, b): return F.getlength(join(tk[a:b]))
     best = [[INF] * (m + 1) for _ in range(n + 1)]; prev = [[None] * (m + 1) for _ in range(n + 1)]
     best[0][0] = 0
@@ -85,7 +117,7 @@ def wrap_exact(text, n, indent, F):
                 w = wid(a, b)
                 if w > lim(i): break
                 slack = lim(i) - w
-                c = best[i][a] + slack ** 2
+                c = best[i][a] + slack ** 2 + break_cost(tk, b)
                 if c < best[i + 1][b]: best[i + 1][b] = c; prev[i + 1][b] = a
     if best[n][m] == INF: return None
     lines, b = [], m
