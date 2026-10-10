@@ -9,7 +9,7 @@ r"""건담 외전 III 빌드(2026-10-10, 1편 tools/build.py 에서) — 음성 
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-import disc, hook, iso, subs, scgfx, apsp
+import disc, hook, iso, subs, scgfx, menugfx, apsp
 
 MOVIES = ('MV_OPD', 'MV_EDA', 'MV_EDB', 'MV_EDC', 'MV_EDD', 'MV_EDE')          # 동영상 자막(먼저 tools/moviesub.py)
 OUT = os.path.join(ROOT, 'work', 'out', 'Mobile Suit Gundam Side Story III - Sabakareshi Mono (Japan) (Track 01).bin')
@@ -28,7 +28,7 @@ def main():
     if '--write' in sys.argv:
         os.makedirs(os.path.dirname(OUT), exist_ok=True)
         files = {'/S0_0.BIN': s0, '/S0_1.BIN': s1, '/SC_1.BIN': sc1}
-        files['/3.BIN'] = scgfx.patch_3bin(disc.read('/3.BIN'))           # 타이틀 로고 부제(크기 그대로)
+        files['/3.BIN'] = menugfx.patch(scgfx.patch_3bin(disc.read('/3.BIN')))   # 타이틀 로고 부제 + STAGE SELECT 글 그림(크기 그대로)
         for k in range(1, apsp.NFILE + 1):                            # 막간 화면 글 그림(tools/apsp.py, 크기 그대로)
             files['/AP_SP%d.BIN' % k] = apsp.patch('AP_SP%d' % k, disc.read('/AP_SP%d.BIN' % k))
         for mv in MOVIES:                                             # 동영상 자막(tools/moviesub.py 가 구운 것, 원본 크기 그대로 → 제자리)
