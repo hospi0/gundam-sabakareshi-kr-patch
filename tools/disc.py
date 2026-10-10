@@ -2,7 +2,7 @@
 """건담 외전 I 트랙 01 ISO 읽기(2026-10-10, 다이노 disc.py 꼴) — 파일 목록·꺼내기. python tools/disc.py <이름…> → work/disc/"""
 import os, struct, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BIN = r'C:\claude\roms\ss\Mobile Suit Gundam Side Story III - Sabakareshi Mono (Japan)\Mobile Suit Gundam Side Story III - Sabakareshi Mono (Japan) (Track 01).bin'
+BIN = r'C:\claude\roms\ss\완료\Mobile Suit Gundam Side Story III - Sabakareshi Mono (Japan)\Mobile Suit Gundam Side Story III - Sabakareshi Mono (Japan) (Track 01).bin'
 
 
 def sec(f, l, n=1):

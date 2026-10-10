@@ -14,24 +14,25 @@ import scgfx
 
 W, H = 320, 24
 HEADERS = [0x279DC, 0x2899C, 0x2981C, 0x2A7DC, 0x2B65C, 0x2C57C, 0x2D49C, 0x2E3BC, 0x2F2DC, 0x301FC, 0x3111C]
-LABEL = (6, 7, 61, 21, '형식번호')        # (x0, y0, x1, y1, 글) — 원본 잉크 x 8‥58, y 8‥19
-KAI = (0x2C57C, (287, 5, 306, 21, '개'))  # EFREET 改
+LABEL = (6, 7, 61, 21, '형식번호', 'Galmuri11-Bold.ttf', 12)   # (x0, y0, x1, y1, 글, 글꼴, 크기) — 원본 잉크 x 8‥58, y 8‥19
+KAI = (0x2C57C, (287, 5, 306, 21, '개', 'Galmuri14.ttf', 15))   # EFREET 改
 BG = 14
-FONT = os.path.join(scgfx.NG, 'NanumGothicBold.ttf')
+GAL = r'C:\claude\utils\font\Galmuri-v2.40.3'   # ★비트맵 글꼴 그대로(하스피 2026-10-11 «형식번호 못생겼어» — 나눔 축소 안티에일리어싱이 뭉개짐)
 
 
 def ink(px, box):
-    x0, y0, x1, y1, text = box
+    """비트맵 글꼴을 안티에일리어싱 없이 찍음(획 = 1 흰색), 칸 가운데"""
+    x0, y0, x1, y1, text, fn, size = box
     w, h = x1 - x0, y1 - y0
-    for size in range(14, 8, -1):
-        F = ImageFont.truetype(FONT, size * 4); b = F.getbbox(text)
-        if (b[2] - b[0]) / 4 <= w - 1 and (b[3] - b[1]) / 4 <= h - 1: break
-    big = Image.new('L', (w * 4, h * 4), 0); dr = ImageDraw.Draw(big)
-    dr.text(((w * 4 - (b[2] - b[0])) // 2 - b[0], (h * 4 - (b[3] - b[1])) // 2 - b[1]), text, font=F, fill=255)
-    cov = np.asarray(big.resize((w, h), Image.LANCZOS), np.float32) / 255
+    F = ImageFont.truetype(os.path.join(GAL, fn), size)
+    im = Image.new('1', (w + 20, h + 20), 0); dr = ImageDraw.Draw(im); dr.fontmode = '1'
+    dr.text((10, 10), text, font=F, fill=1)
+    a = np.array(im); ys, xs = np.where(a)
+    a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]; gh, gw = a.shape
+    assert gw <= w and gh <= h, (text, gw, gh, w, h)
     sub = np.full((h, w), BG, np.uint8)
-    on = cov > 0.12
-    sub[on] = np.clip(np.round(1 + (0.85 - cov[on]) / 0.73 * 12), 1, 13).astype(np.uint8)
+    oy, ox = (h - gh) // 2, (w - gw) // 2
+    sub[oy:oy + gh, ox:ox + gw][a] = 1
     px[y0:y1, x0:x1] = sub
     return px
 
