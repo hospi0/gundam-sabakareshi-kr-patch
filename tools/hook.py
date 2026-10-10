@@ -50,7 +50,7 @@ DMAE = port.DMAE; DMAE_LIT = port.DMAE_LIT
 #   → 그 원본 리터럴(0x06048474 = 0x8604845A, 비트 31 = 표 끝)을 우리 견본 TPL 로: 평소 END, 자막 켜지면 «건너뛰고 점프 → 우리 칸».
 #   TPL = S0_0 안 0x0603BAC0‥0x0603BD40(파일 0·스테이트 16장 모두 0·가리키는 리터럴 없음) — SCU DMA 가 읽으려면 상위 RAM 이어야 함.
 TPL = port.TPL; TPL_LIT = port.TPL_LIT; TPL_OLD = port.TPL_OLD       # SCU 2단계 DMA 끝(벡터 0x49) — 명령표 DMA 가 끝나면 깃발만 세움
-TEX = 0x25C70800; TEXA = (TEX & 0x7FFFF) // 8
+TEX = 0x25C72400; TEXA = (TEX & 0x7FFFF) // 8   # ★2026-10-10 2·3편 브리핑 얼굴 애니메이션이 0x70A00‥0x719C0 을 매 프레임 씀(1편 0x70800 이면 자막 깨짐, 하스피 «3편도 마찬가지») → 그 뒤로. 최대 20 KB → 0x77400 < OWN
 LIST = 0x25C00000
 OWN = 0x25C7F000; OWNL = (OWN & 0x7FFFF) // 8
 # ★우선순위(2026-10-10 PoC 2차 안 보임): 조종석 계기판·컷신 띠 = NBG0 우선순위 7, 스프라이트 PRISA‥D 모두 5 → 자막이 밑에 깔림.
