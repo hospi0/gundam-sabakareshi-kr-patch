@@ -65,7 +65,8 @@ def main():
     for _ in range(H.OFFN + 1): S.run(m, lab['vbi'], calls={H.VBI: lambda r, mm: None})
     hit4 &= m.r16(H.TPL) == 0x8000; print('견본: 켜지면 점프·꺼지면 END %s' % hit4); ok &= hit4
     # 표에 없는 스트림 = 자막 없음
-    m = mem(blob); m.w16(H.LIST, 0x8000); m.w32(H.STREAM + 0x0C, 3); m.w32(H.STREAM + 4, 2); m.w32(H.STREAM + 0x18, 100 * H.BPF)   # V08 = 자막 없음
+    NOSUB = min(k for k in range(6, 6 + H.NT) if 'V%02d' % k not in subs.load())
+    m = mem(blob); m.w16(H.LIST, 0x8000); m.w32(H.STREAM + 0x0C, 3); m.w32(H.STREAM + 4, NOSUB - 6); m.w32(H.STREAM + 0x18, 100 * H.BPF)   # 자막 없는 번호(번역 없음·NO_SUB)
     S.run(m, lab['vbi'], calls={H.VBI: lambda r, mm: None}); hit = m.r16(H.LIST) == 0x8000
     print('표에 없는 스트림 = 자막 없음', hit); ok &= hit
     print('코드 %d B · 상주 끝 %s(한계 %s)' % (len(res), hex(H.TAB + len(sb)), hex(H.END)))
