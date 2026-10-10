@@ -11,3 +11,8 @@
 !work/text/*.py
 work/text/split/
 __pycache__/
+!work/movie/
+work/movie/*
+!work/movie/movie_subs.tsv
+!work/movie/asr/
+!work/movie/asr/*.tsv
